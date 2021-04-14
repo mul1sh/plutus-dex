@@ -1,0 +1,51 @@
+cabal-version:      2.4
+name:               plutus-dex
+version:            0.0.0.1
+license: MIT
+license-files: LICENSE
+author:             Mulili Nzuki
+maintainer:         mulili.nzuki@gmail.com
+
+-- A copyright notice.
+-- copyright:
+-- category:
+-- extra-source-files: CHANGELOG.md
+
+library
+    exposed-modules:
+      PlutusDex
+    build-depends:
+      base ^>=4.14.1.0,
+      plutus-contract,
+      plutus-tx-plugin,
+      plutus-tx,
+      plutus-ledger,
+      aeson,
+      containers,
+      playground-common,
+      plutus-contract,
+      text,
+      lens -any,
+    hs-source-dirs: src
+    default-language: Haskell2010
+
+executable mymodule
+    main-is: PlutusDex.hs
+    hs-source-dirs: src
+    default-extensions: ExplicitForAll ScopedTypeVariables
+                    DeriveGeneric StandaloneDeriving DeriveLift
+                    GeneralizedNewtypeDeriving DeriveFunctor DeriveFoldable
+                    DeriveTraversable MultiParamTypeClasses
+    build-depends:
+      base ^>=4.14.1.0,
+      plutus-contract,
+      plutus-tx-plugin,
+      plutus-tx,
+      plutus-ledger,
+      aeson,
+      containers,
+      playground-common,
+      plutus-contract,
+      text
+
+    default-language: Haskell2010

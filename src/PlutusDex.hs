@@ -9,7 +9,7 @@
 {-# LANGUAGE ViewPatterns      #-}
 {-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 {-# OPTIONS_GHC -fno-ignore-interface-pragmas #-}
-module Plutus.Contracts.Swap(
+module PlutusDex(
     Swap(..),
     -- * Script
     swapValidator
@@ -28,16 +28,7 @@ import           Ledger.Value         (Value)
 import qualified PlutusTx             as PlutusTx
 import           PlutusTx.Prelude
 
--- | A swap is an agreement to exchange cashflows at future dates. To keep
---  things simple, this is an interest rate swap (meaning that the cashflows are
---  interest payments on the same principal amount but with two different
---  interest rates, of which one is fixed and one is floating (varying with
---  time)) with only a single payment date.
---
---  At the beginning of the contract, the fixed rate is set to the expected
---  future value of the floating rate (so if the floating rate behaves as
---  expected, the two payments will be exactly equal).
---
+
 data Swap = Swap
     { swapNotionalAmt     :: !Ada
     , swapObservationTime :: !Slot
@@ -162,10 +153,7 @@ mkValidator Swap{..} SwapOwners{..} redeemer p@ValidatorCtx{valCtxTxInfo=txInfo}
 
     in inConditions && outConditions
 
--- | Validator script for the two transactions that initialise the swap.
---   See note [Swap Transactions]
---   See note [Contracts and Validator Scripts] in
---       Language.Plutus.Coordination.Contracts
+
 swapValidator :: Swap -> Validator
 swapValidator swp = Ledger.mkValidatorScript $
     $$(PlutusTx.compile [|| validatorParam ||])
@@ -173,25 +161,3 @@ swapValidator swp = Ledger.mkValidatorScript $
             PlutusTx.liftCode swp
     where validatorParam s = Scripts.wrapValidator (mkValidator s)
 
-{- Note [Swap Transactions]
-
-The swap involves three transactions at two different times.
-
-1. At t=0. Each participant deposits the margin. The outputs are locked with
-   the same validator script, `swapValidator`
-2. At t=n. The value of the floating rate, and consequently the values of the
-   two payments are determined. Each participant gets their margin plus or
-   minus the actual payment.
-
-There is a risk of losing out if the interest rate moves outside the range of
-fixedRate +/- (margin / notional amount). In a real financial contract this
-would be dealt with by agreeing a "Variation Margin". This means that the
-margin is adjusted at predefined dates before the actual payment is due. If one
-of the parties fails to make the variation margin payment, the contract ends
-prematurely and the other party gets to keep both margins.
-
-Plutus should be able to handle variation margins in a series of validation
-scripts. But it seems to me that they could get quite messy so I don't want to
-write them by hand :) We can probably use TH to generate them at compile time.
-
--}
